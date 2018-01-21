@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Socket.IO test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font: 13px Helvetica, Arial;
+        }
+
+        div {
+            background: #000;
+            padding: 3px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        div input {
+            border: 0;
+            padding: 10px;
+            width: 90%;
+            margin-right: .5%;
+        }
+
+        div button {
+            width: 9%;
+            background: rgb(130, 224, 255);
+            border: none;
+            padding: 10px;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages li {
+            padding: 5px 10px;
+        }
+
+        #messages li:nth-child(odd) {
+            background: #eee;
+        }
+
+        p {
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+
+<body>
+        
+        
+    <ul id="messages"></ul>
+
+    <div action="">
+        <input id="m" autocomplete="off" />
+        <button id="sendButton">Send</button>
+    </div>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script type="text/javascript">
+        $('#messages').prepend($('<li>').text('http://127.0.0.1:9023/enter_room?userid=123&roomid=666666&sign=111'));
+        $('#messages').prepend($('<li>').text('login|{"userId":123,"roomId":"666666"}'));
+        $('#messages').prepend($('<li>').text('enterGame'));
+        $('#messages').prepend($('<li>').text('startGame'));
+        $('#messages').prepend($('<li>').text('stake|{"stake":100,"seatIndex":0}'));
+
+        var socket = io('http://localhost:10020');
+
+        socket.on('connect', function () {
+            $('#messages').prepend($('<li>').text('已连接至服务器'));
+        });
+        socket.on('disconnect', function () {
+            $('#messages').prepend($('<li>').text('断开连接'));
+        });
+        socket.on('login_result', function (obj) {
+            $('#messages').prepend($('<li>').text('login_result : '+JSON.stringify(obj)));
+        });
+        socket.on('login_finished', function (obj) {
+            $('#messages').prepend($('<li>').text('login_finished : '+JSON.stringify(obj)));
+        });
+        socket.on('game_sync_push', function (obj) {
+            $('#messages').prepend($('<li>').text('game_sync_push : '+JSON.stringify(obj)));
+        });
+        socket.on('user_enter_push', function (obj) {
+            $('#messages').prepend($('<li>').text('user_enter_push : '+JSON.stringify(obj)));
+        });
+        socket.on('game_start_push', function (obj) {
+            $('#messages').prepend($('<li>').text('game_start_push : '+JSON.stringify(obj)));
+        });
+        socket.on('game_stop_push', function (obj) {
+            $('#messages').prepend($('<li>').text('game_stop_push : '+JSON.stringify(obj)));
+        });
+        socket.on('state_idle_notify_push', function (obj) {
+            $('#messages').prepend($('<li>').text('state_idle_notify_push : '+JSON.stringify(obj)));
+        });
+        socket.on('state_deal_notify_push', function (obj) {
+            $('#messages').prepend($('<li>').text('state_deal_notify_push : '+JSON.stringify(obj)));
+        });
+        socket.on('state_stake_notify_push', function (obj) {
+            $('#messages').prepend($('<li>').text('state_stake_notify_push : '+JSON.stringify(obj)));
+        });
+        socket.on('state_turnOverCard_notify_push', function (obj) {
+            $('#messages').prepend($('<li>').text('state_turnOverCard_notify_push : '+JSON.stringify(obj)));
+        });
+        socket.on('state_showCard_notify_push', function (obj) {
+            $('#messages').prepend($('<li>').text('state_showCard_notify_push : '+JSON.stringify(obj)));
+        });
+        socket.on('state_showResult_notify_push', function (obj) {
+            $('#messages').prepend($('<li>').text('state_showResult_notify_push : '+JSON.stringify(obj)));
+        });
+        socket.on('stake_notify_push', function (obj) {
+            $('#messages').prepend($('<li>').text('stake_notify_push : '+JSON.stringify(obj)));
+        });
+
+        function send(){
+            var input = $('#m').val();
+            var infos = input.split('|');
+
+            socket.emit(infos[0], infos[1]);
+            $('#m').val('');
+        }
+
+        $('#m').keydown(function (e) {
+            if (e.keyCode === 13) {
+                send();
+            }
+        })
+
+        $('#sendButton').click(function(){
+            send();
+        })
+    </script>
+</body>
+
+</html>

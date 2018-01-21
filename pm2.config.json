@@ -1,0 +1,28 @@
+{
+  "apps": [
+    {
+      "name": "sangong_account",
+      "script": "./account_server/app.js"
+    },
+    {
+      "name": "sangong_hall",
+      "script": "./hall_server/app.js"
+    },
+    {
+      "name": "sangong_game_sg",
+      "script": "./game_sangong_server/app.js"
+    },
+    {
+      "name": "sangong_game_gsg",
+      "script": "./game_goldsangong_server/app.js"
+    },
+    {
+      "name": "sangong_game_wzq",
+      "script": "./game_wzq_server/app.js"
+    },
+    {
+      "name": "sangong_web",
+      "script": "./web_server/bin/www"
+    }
+  ]
+}
