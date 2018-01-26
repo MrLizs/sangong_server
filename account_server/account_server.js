@@ -21,9 +21,6 @@ exports.start = function(cfg){
 }
 
 
-
-
-
 //设置跨域访问
 app.all('*', function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -93,6 +90,20 @@ app.get('/guest',function(req,res){
 	send(res,ret);
 });
 
+app.get('/wechatguest',function(req,res){
+	var account = "wx_" + req.query.account;
+	var sign = crypto.md5(account + req.ip + config.ACCOUNT_PRI_KEY);
+	var ret = {
+		errcode:0,
+		errmsg:"ok",
+		account:account,
+		halladdr:hallAddr,
+		sign:sign
+	}
+	send(res,ret);
+});
+
+
 app.get('/bind_dealerid',function(req, res){
 	var userid = req.query.userid;
 	var dealerid = req.query.dealerid;
@@ -137,12 +148,12 @@ app.get('/auth',function(req,res){
 
 var appInfo = {
 	Android:{
-		appid: "wx37309723e0523bcc",
-		secret: "ae5596e56e4cfbceafeb057d36c6480b",
+		appid: "wx250293b64cbb120d",
+		secret: "d445da8279ab8546eb3054b156f46b4d",
 	},
 	iOS:{
-		appid: "wx37309723e0523bcc",
-		secret: "ae5596e56e4cfbceafeb057d36c6480b",
+		appid: "wx250293b64cbb120d",
+		secret: "d445da8279ab8546eb3054b156f46b4d",
 	}
 };
 

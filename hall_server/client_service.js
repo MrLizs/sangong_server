@@ -47,46 +47,51 @@ app.get('/login',function(req,res){
 	}
 	
 	var account = req.query.account;
-	db.get_user_data(account,function(data){
-		if(data == null){
-			http.send(res,0,"ok");
-			return;
-		}
-
-		var ret = {
-			account:data.account,
-			userid:data.userid,
-			name:data.name,
-			lv:data.lv,
-			exp:data.exp,
-			coins:data.coins,
-			yuanbaos:data.yuanbaos,
-			coinsbank:data.coinsbank,
-			yuanbaosbank:data.yuanbaosbank,
-			gems:data.gems,
-			ip:ip,
-			sex:data.sex,
-		};
-
-		db.get_room_id_of_user(data.userid,function(roomId){
-			//如果用户处于房间中，则需要对其房间进行检查。 如果房间还在，则通知用户进入
-			if(roomId != null){
-				//检查房间是否存在于数据库中
-				db.is_room_exist(roomId,function (retval){
-					if(retval){
-						ret.roomid = roomId;
+	db.get_user_userlock(account,function(err,row){
+		if(row){
+			db.get_user_data(account,function(data){
+				if(data == null){
+					http.send(res,0,"ok");
+					return;
+				}
+				var ret = {
+					account:data.account,
+					userid:data.userid,
+					name:data.name,
+					lv:data.lv,
+					exp:data.exp,
+					coins:data.coins,
+					yuanbaos:data.yuanbaos,
+					coinsbank:data.coinsbank,
+					yuanbaosbank:data.yuanbaosbank,
+					gems:data.gems,
+					ip:ip,
+					sex:data.sex,
+				};
+				db.get_room_id_of_user(data.userid,function(roomId){
+					//如果用户处于房间中，则需要对其房间进行检查。 如果房间还在，则通知用户进入
+					if(roomId != null){
+						//检查房间是否存在于数据库中
+						db.is_room_exist(roomId,function (retval){
+							if(retval){
+								ret.roomid = roomId;
+							}
+							else{
+								//如果房间不在了，表示信息不同步，清除掉用户记录
+								db.set_room_id_of_user(data.userid,null);
+							}
+							http.send(res,0,"ok",ret);
+						});
 					}
-					else{
-						//如果房间不在了，表示信息不同步，清除掉用户记录
-						db.set_room_id_of_user(data.userid,null);
+					else {
+						http.send(res,0,"ok",ret);
 					}
-					http.send(res,0,"ok",ret);
 				});
-			}
-			else {
-				http.send(res,0,"ok",ret);
-			}
-		});
+			});
+		}
+		else{
+			http.send(res,err,"account is locked");
+		}
 	});
 });
 
@@ -108,7 +113,7 @@ app.get('/create_user',function(req,res){
 					http.send(res,2,"system error.");
 				}
 				else{
-					http.send(res,0,"ok");					
+					http.send(res,0,"ok");
 				}
 			});
 		}
@@ -708,11 +713,21 @@ app.get('/chouJiang',function(req,res){
 			//抽奖
 			var maxNum = 0;
 			for(var i=0;i<chouJiangConfig.gifts.length;i++){
-				maxNum += chouJiangConfig.gifts[i].rate;
+				if(typeof chouJiangConfig.gifts[i].rate == 'string'){
+					maxNum += parseFloat(chouJiangConfig.gifts[i].rate);
+				}
+				else{
+					maxNum += chouJiangConfig.gifts[i].rate;
+				}
 			}
-			var num = parseInt(Math.random()*maxNum);
+			var num = parseFloat(Math.random()*maxNum);
 			for(var i=0;i<chouJiangConfig.gifts.length;i++){
-				num -= chouJiangConfig.gifts[i].rate;
+				if(typeof chouJiangConfig.gifts[i].rate == 'string'){
+					num -= parseFloat(chouJiangConfig.gifts[i].rate);
+				}
+				else{
+					num -= chouJiangConfig.gifts[i].rate;
+				}
 				if(num<=0){ //中奖了
 					var gift = chouJiangConfig.gifts[i];
 					//发放奖品

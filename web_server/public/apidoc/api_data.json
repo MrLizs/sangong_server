@@ -504,7 +504,7 @@
     "groupTitle": "AdminUsers"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/api/admin/users/brokerageHistory",
     "title": "查看代理的流水",
     "description": "<p>查看代理的流水</p>",
@@ -519,6 +519,33 @@
             "optional": false,
             "field": "Authorization",
             "description": "<p>token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "username",
+            "description": "<p>用户名(可空)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "skip",
+            "description": "<p>分页跳过记录数(可空)</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "limit",
+            "description": "<p>查询记录数(可空)</p>"
           }
         ]
       }
@@ -562,10 +589,10 @@
   },
   {
     "type": "post",
-    "url": "/api/admin/users/brokerageHistoryByID",
-    "title": "查看指定代理的流水",
-    "description": "<p>查看指定代理的流水</p>",
-    "name": "brokerageHistoryByID",
+    "url": "/api/admin/users/getAgency",
+    "title": "查询代理列表",
+    "description": "<p>查询代理列表</p>",
+    "name": "getAgency",
     "group": "AdminUsers",
     "header": {
       "fields": {
@@ -585,67 +612,17 @@
         "Parameter": [
           {
             "group": "Parameter",
-            "type": "string",
+            "type": "int",
             "optional": false,
-            "field": "username",
-            "description": "<p>用户名</p>"
-          }
-        ]
-      }
-    },
-    "success": {
-      "fields": {
-        "Success 200": [
+            "field": "skip",
+            "description": "<p>分页跳过记录数</p>"
+          },
           {
-            "group": "Success 200",
-            "type": "string",
+            "group": "Parameter",
+            "type": "int",
             "optional": false,
-            "field": "data",
-            "description": "<p>是否成功</p>"
-          }
-        ]
-      }
-    },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "type": "string",
-            "optional": false,
-            "field": "error",
-            "description": "<p>错误信息</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Error Code:",
-          "content": "410 token格式错误",
-          "type": "string"
-        }
-      ]
-    },
-    "version": "1.0.0",
-    "filename": "web_server/routes/api/admin/users.js",
-    "groupTitle": "AdminUsers"
-  },
-  {
-    "type": "get",
-    "url": "/api/admin/users/getAgency",
-    "title": "查询代理列表",
-    "description": "<p>查询代理列表</p>",
-    "name": "getAgency",
-    "group": "AdminUsers",
-    "header": {
-      "fields": {
-        "Header": [
-          {
-            "group": "Header",
-            "type": "string",
-            "optional": false,
-            "field": "Authorization",
-            "description": "<p>token</p>"
+            "field": "limit",
+            "description": "<p>查询记录数</p>"
           }
         ]
       }
@@ -842,7 +819,7 @@
     "groupTitle": "AdminUsers"
   },
   {
-    "type": "get",
+    "type": "post",
     "url": "/api/admin/users/getUserOrders",
     "title": "查询用户充值记录",
     "description": "<p>查询用户游戏记录</p>",
@@ -857,6 +834,26 @@
             "optional": false,
             "field": "Authorization",
             "description": "<p>token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "skip",
+            "description": "<p>分页跳过记录数</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "int",
+            "optional": false,
+            "field": "limit",
+            "description": "<p>查询记录数</p>"
           }
         ]
       }
@@ -1018,6 +1015,83 @@
             "optional": false,
             "field": "result.count",
             "description": "<p>总数</p>"
+          }
+        ]
+      }
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "type": "string",
+            "optional": false,
+            "field": "error",
+            "description": "<p>错误信息</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Error Code:",
+          "content": "401 认证错误\n402 没有权限\n410 查询错误",
+          "type": "string"
+        }
+      ]
+    },
+    "version": "1.0.0",
+    "filename": "web_server/routes/api/admin/users.js",
+    "groupTitle": "AdminUsers"
+  },
+  {
+    "type": "post",
+    "url": "/api/admin/users/update_user_lock",
+    "title": "停封玩家帐号",
+    "description": "<p>停封玩家帐号</p>",
+    "name": "update_user_lock",
+    "group": "AdminUsers",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "string",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>token</p>"
+          }
+        ]
+      }
+    },
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "userid",
+            "description": "<p>玩家id</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "string",
+            "optional": false,
+            "field": "value",
+            "description": "<p>是否封号(0:否,1:是)</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "string",
+            "optional": false,
+            "field": "data",
+            "description": "<p>'true'</p>"
           }
         ]
       }

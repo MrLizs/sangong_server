@@ -1,4 +1,6 @@
 var express = require('express');
+var db = require('../../utils/db');
+
 var router = express.Router();
 router.caseSensitive = true;
 //var url = require('url');
@@ -7,9 +9,9 @@ var moment = require('../node_modules/moment');
 
 var config = require('../../configs.js');
 
-var tenpay = require('tenpay');
-var api = new tenpay(config.wxPaymentConfig);
-var middleware = api.middlewareForExpress();
+// var tenpay = require('tenpay');
+// var api = new tenpay(config.wxPaymentConfig);
+// var middleware = api.middlewareForExpress();
 
 // var WePayService = require('../service/wePay');
 // var wePayService = new WePayService();
@@ -17,12 +19,6 @@ var middleware = api.middlewareForExpress();
 var https = require('https');
 var iconv = require("iconv-lite");
 var signature = require('wx_jsapi_sign');
-
-var log4js = require("log4js");
-var log4js_config = require("../log4js_config.json");
-log4js.configure(log4js_config);
-var loggerFile = log4js.getLogger('log_file');
-var loggerDateFile = log4js.getLogger('log_date');
 
 router.post('/api/sign', function (req, res) {
     var url = req.body.url;
@@ -39,7 +35,7 @@ router.post('/api/sign', function (req, res) {
 });
 
 var getWxUserToken = function (code, callback) {
-    var url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' + config.wxAppid + '&secret=' + config.wxAppSecret + '&code=' + code + '&grant_type=authorization_code';
+    var url = 'https://api.weixin.qq.com/sns/oauth2/access_token?appid=' + config.wxConfig.wxAppid + '&secret=' + config.wxConfig.wxAppSecret + '&code=' + code + '&grant_type=authorization_code';
     https.get(url, function (httpRes) {
         var datas = [];
         var size = 0;
@@ -108,14 +104,39 @@ router.get('/api/wxUserOpenid/:code', function (req, res) {
 router.get('/api/wxUserInfo/:code', function (req, res) {
     var code = req.params.code;
     getWxUserToken(code, function (err, tokenObj) {
+        console.log("getWxUserToken  err:" + err + " \n tokenObj:"+tokenObj);
         if (err) {
             res.json(500, err);
         } else {
             getWxUserInfo(tokenObj, function (err, userInfo) {
+                console.log("getWxUserInfo  err:" + err + " \n userInfo:"+userInfo);
                 if (err) {
                     res.json(500, err);
                 } else {
-                    res.json(userInfo);
+                    var account = "wx_" + userInfo.openid;
+                    var name = userInfo.nickname;
+                    var coins = 0;
+                    var yuanbaos = 0;
+                    var gems = 100;
+                    db.is_user_exist(account,function(ret){
+                        if(!ret){
+                            db.create_user(account,name,coins,yuanbaos,gems,userInfo.sex,userInfo.headimgurl,function(ret){
+                                if (ret == null) {
+                                    console.log("system error.");
+                                    res.json(500,'system error.');
+                                    // res.json("system error.");
+                                }
+                                else{
+                                    res.json(userInfo);
+                                }
+                            });
+                        }
+                        else{
+                            console.log("account have already exist.");
+                            res.json(userInfo);
+                            // res.json("account have already exist.");
+                        }
+                    });
                 }
             });
         }
@@ -143,11 +164,11 @@ router.get('/api/wxUserInfo/:code', function (req, res) {
 // });
 
 //微信支付回调
-router.post('/api/payCallback', middleware, function (req, res) {
-    res.send('SUCCESS');
-    console.log(req.weixin);
-    // if (req.weixin.return_code == 'SUCCESS') {
-    // }
-});
+// router.post('/api/payCallback', middleware, function (req, res) {
+//     res.send('SUCCESS');
+//     console.log(req.weixin);
+//     // if (req.weixin.return_code == 'SUCCESS') {
+//     // }
+// });
 
 module.exports = router;

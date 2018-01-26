@@ -278,6 +278,9 @@ gameManager.prototype = {
             winnerResult.score = parseInt(winnerResult.score * (1 - rate));
         }
         var commission = winnerResult.stake - winnerResult.score;
+        if(!commission){
+            commission = 0
+        }
         db.add_commissionhistory(winnerResult.userId,'coins',commission,function(err,row){if(row){console.log(row);};});
 
         for(var i=0;i<game.gameSeats.length;i++){

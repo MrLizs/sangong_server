@@ -1,4 +1,6 @@
-﻿var HALL_IP = "47.104.88.251";
+﻿// var HALL_IP = "103.60.166.3";
+// var HALL_IP = "192.168.1.107";
+var HALL_IP = "127.0.0.1";
 var HALL_CLIENT_PORT = 9021;
 var HALL_ROOM_PORT = 9022;
 
@@ -18,14 +20,22 @@ var LOCAL_IP = '127.0.0.1';
 // 	}
 // };
 
+// exports.mysql = function(){
+// 	return {
+// 		HOST:'103.60.166.3',
+// 		USER:'root',
+// 		PSWD:'CC166.123456',
+// 		DB:'sangong',
+// 		PORT:3306,
+// 	}
+// };
 exports.mysql = function(){
 	return {
-		HOST:'47.104.88.251',
+		HOST:'127.0.0.1',
 		USER:'root',
-		PSWD:'miduo181818',
+		PSWD:'1234',
 		DB:'sangong',
 		PORT:3306,
-		multipleStatements:true
 	}
 };
 
@@ -83,8 +93,8 @@ exports.game_server = function(){
 //web_server
 exports.web_server = function(){
 	return {
-		PORT:9029,
-		serverRootUrl:'http://sangong.emidoo.com',
+		PORT:80,//9029,
+		serverRootUrl:'http://sangong.diandg.com',
 		addGemsUrl:'http://127.0.0.1:9024/add_user_gems'
 	};
 };
@@ -101,13 +111,24 @@ exports.qianYiFuConfig = function(){
 	};
 };
 
+exports.wxConfig = {
+		wxAppid:'wx250293b64cbb120d',
+		wxAppSecret:'d445da8279ab8546eb3054b156f46b4d',
+}
+
+exports.wxJsapiSignConfig={
+    appId: exports.wxConfig.wxAppid,
+    appSecret: exports.wxConfig.wxAppSecret,
+    appToken: 'SHANG',
+    cache_json_file:'tmp'
+}
 
 exports.wxPaymentConfig = function(){
 	return {
-    appid: config.wxAppid,
-    mchid: config.wxMchid,
+    appid: exports.wxConfig.wxAppid,
+    mchid: exports.wxConfig.wxMchid,
     partnerKey: config.wxPartnerKey,
-    pfx: require('fs').readFileSync('cert/apiclient_cert.p12'),
+    //pfx: require('fs').readFileSync('cert/apiclient_cert.p12'),
 	notify_url: config.serverRootUrl+'/wechat/api/payCallback',
 	};
 }

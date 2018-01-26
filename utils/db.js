@@ -170,7 +170,7 @@ exports.get_user_data = function(account,callback){
         return;
     }
 
-    var sql = 'SELECT userid,account,name,lv,exp,coins,yuanbaos,coinsbank,yuanbaosbank,gems,roomid,sex FROM t_users WHERE account = "' + account + '"';
+    var sql = 'SELECT * FROM t_users WHERE account = "' + account + '"';
     query(sql, function(err, rows, fields) {
         if (err) {
             callback(null);
@@ -522,6 +522,7 @@ exports.create_user = function(account,name,coins,yuanbaos,gems,sex,headimg,call
         if (err) {
             //throw err;
             callback(false);
+            return;
         }
         callback(true);
     });
@@ -1534,8 +1535,11 @@ exports.user_online_log = function(userid,online,callback){//玩家是否在线 
         callback(false);
         return;
     }
-    if(online==0)var sql = 'UPDATE t_users_log SET status = "'+0+'" AND last_logout_time = unix_timestamp(now()) WHERE userid = ' + userid;
-    else         var sql = 'UPDATE t_users_log SET status = "'+online+'" AND last_login_time = unix_timestamp(now()) WHERE userid = ' + userid;
+    var sql = '';
+    if(online==0)
+        sql = 'UPDATE t_users_log SET status = "'+0+'" AND last_logout_time = unix_timestamp(now()) WHERE userid = ' + userid;
+    else
+        sql = 'UPDATE t_users_log SET status = "'+online+'" AND last_login_time = unix_timestamp(now()) WHERE userid = ' + userid;
     console.log(sql);
     query(sql,function(err,rows,fields){
         if(err){
@@ -1946,9 +1950,12 @@ exports.update_Shop = function(shopStr,callback){
     });
 };
 
-exports.get_orders = function(callback){
+exports.get_orders = function(skip,limit,callback){
     callback = callback == null? nop:callback;
     var sql = "SELECT * FROM `orders` WHERE state != 'noPay'";
+    if(skip && limit){
+        sql += "LIMIT "+skip + "," + limit;
+    }
     query(sql, function(err, rows, fields) {
         if (err) {
             callback(null);
@@ -1962,9 +1969,13 @@ exports.get_orders = function(callback){
     });
 };
 
-exports.get_Agency = function(callback){
+exports.get_Agency = function(skip,limit,callback){
     callback = callback == null? nop:callback;
     var sql = "SELECT * FROM `t_agencyManager`";
+    if(skip && limit){
+        sql += "LIMIT "+skip + "," + limit;
+    }
+
     query(sql, function(err, rows, fields) {
         if (err) {
             callback(null);
@@ -2086,9 +2097,16 @@ exports.update_agencyPay = function(type,value,username,callback){
     });
 };
 
-exports.get_brokerageHistory = function(callback){
+exports.get_brokerageHistory = function(skip,limit,username,callback){
     callback = callback == null? nop:callback;
     var sql = "SELECT * FROM `t_brokerageHistory`";
+    if(username){
+        sql += " WHERE userName=?";
+        sql = mysql.format(sql,[username]);
+    }
+    if(skip && limit){
+        sql += "LIMIT "+skip + "," + limit;
+    }
     query(sql, function(err, rows, fields) {
         if (err) {
             callback(null);
@@ -2418,14 +2436,14 @@ exports.updateAgencyValue = function(userName,addType,addValue,callback){
     });
 };
 
-exports.get_commissionhistory = function(callback){
+exports.get_commissionhistory = function(username,callback){
     callback = callback == null? nop:callback;
     // if(!userName){
     //     callback('no userName or password');
     //     return;
     // }
-    var sql = 'SELECT * FROM t_commissionhistory ';
-    // sql = mysql.format(sql,[userName]);
+    var sql = 'SELECT * FROM t_commissionhistory WHERE agency_userName = ?';
+    sql = mysql.format(sql,[username]);
     query(sql, function(err, rows, fields) {
         if (err) {
             callback(err);
@@ -2453,7 +2471,7 @@ exports.get_agency_player = function(username,callback){
             return;
         }
         if(rows.length == 0){
-            callback('can not find admin');
+            callback('not data');
             return;
         }
         callback(null,rows);
@@ -2509,7 +2527,7 @@ exports.update_user_lock = function(userid,value,callback){
         return;
     }
     
-    var sql = 'UPDATE t_users SET userelock=? WHERE userid=?';
+    var sql = 'UPDATE t_users SET userlock=? WHERE userid=?';
     sql = mysql.format(sql,[value,userid]);
     query(sql,function(err,rows,fields){
         if(err){
@@ -2534,7 +2552,7 @@ exports.get_agency_accountlock = function(username,callback){
         callback(false);
         return;
     }
-    var sql = 'SELECT accountlock FROM t_agencymanager WHERE userName=?'
+    var sql = 'SELECT accountlock FROM t_agencyManager WHERE userName=?'
     sql = mysql.format(sql,[username]);
     query(sql, function(err, rows, fields) {
         if (err) {
@@ -2550,6 +2568,32 @@ exports.get_agency_accountlock = function(username,callback){
         }
         else if(rows[0].accountlock == 1){
             callback(null,false);
+        }
+    });
+};
+
+exports.get_user_userlock = function(account,callback){
+    callback = callback == null? nop:callback;
+    if(account == null){
+        callback(false);
+        return;
+    }
+    var sql = 'SELECT userlock FROM t_users WHERE account=?'
+    sql = mysql.format(sql,[account]);
+    query(sql, function(err, rows, fields) {
+        if (err) {
+            callback(err);
+            return;
+        }
+        if(rows.length == 0){
+            callback(-2,true);
+            return;
+        }
+        if(rows[0].userlock == 0){
+            callback(null,true);
+        }
+        else if(rows[0].userlock == 1){
+            callback(-1,false);
         }
     });
 };

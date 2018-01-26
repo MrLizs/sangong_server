@@ -17,8 +17,8 @@ exports.auth = function (token, role, success, noRoles, error) {
             //   error('wrong ip');
             //   return;
             // }
-            db.get_agency_accountlock(loginInfos[0],function(err,row){
-                if(row){
+            // db.get_agency_accountlock(loginInfos[0],function(err,row){
+            //     if(row){
                     db.auth_agency(loginInfos[0], loginInfos[1], function (err, admin) {
                         if (err) {
                             error(err);
@@ -42,11 +42,11 @@ exports.auth = function (token, role, success, noRoles, error) {
                         }
                         return;
                     });
-                }
-                else if(row == false){
-                    error('account is locked');
-                }
-            });
+            //     }
+            //     else if(row == false){
+            //         error('account is locked');
+            //     }
+            // });
             
         } else {
             error('no token in server');

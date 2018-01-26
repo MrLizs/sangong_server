@@ -675,11 +675,13 @@ router.post('/getUserInfo',function(req,res,next){
 });
 
 /**
-* @api {get} /api/admin/users/getUserOrders 查询用户充值记录
+* @api {post} /api/admin/users/getUserOrders 查询用户充值记录
 * @apiDescription 查询用户游戏记录
 * @apiName getUserOrders
 * @apiGroup AdminUsers
 * @apiHeader {string} Authorization token
+* @apiParam {int} skip 分页跳过记录数
+* @apiParam {int} limit 查询记录数
 * @apiSuccess {string} data 所有游戏记录
 * @apiError {string} error 错误信息
 * @apiErrorExample {string} Error Code:
@@ -688,10 +690,16 @@ router.post('/getUserInfo',function(req,res,next){
 *     410 查询错误
 * @apiVersion 1.0.0
 */
-router.get('/getUserOrders',function(req,res,next){
+router.post('/getUserOrders',function(req,res,next){
   var token = req.headers.authorization;
+  var skip = req.body.skip;
+  var limit = req.body.limit;
+  if(skip<0){
+    skip = 0;
+  }
+
   adminService.auth(token,null, function onSuccess(admin) {
-      db.get_orders(function(row){
+      db.get_orders(skip,limit,function(row){
         if(!row){
           res.json('error');
         }
@@ -708,21 +716,28 @@ router.get('/getUserOrders',function(req,res,next){
 
 
 /**
-* @api {get} /api/admin/users/getAgency 查询代理列表
+* @api {post} /api/admin/users/getAgency 查询代理列表
 * @apiDescription 查询代理列表
 * @apiName getAgency
 * @apiGroup AdminUsers
 * @apiHeader {string} Authorization token
+* @apiParam {int} skip 分页跳过记录数
+* @apiParam {int} limit 查询记录数
 * @apiSuccess {string} data 列表数组
 * @apiError {string} error 错误信息
 * @apiErrorExample {string} Error Code:
 *     410 token格式错误
 * @apiVersion 1.0.0
 */
-router.get('/getAgency', function (req, res, next) {
+router.post('/getAgency', function (req, res, next) {
   var token = req.headers.authorization;
-  // adminService.auth(token,null, function onSuccess(admin) {
-    db.get_Agency(function(row){
+  var skip = req.body.skip;
+  var limit = req.body.limit;
+  if(skip<0){
+    skip = 0;
+  }
+  adminService.auth(token,null, function onSuccess(admin) {
+    db.get_Agency(skip,limit,function(row){
       if(row){
         res.json(row);
       }
@@ -731,11 +746,11 @@ router.get('/getAgency', function (req, res, next) {
       }
     });
     
-  // }, function noRoles(role) {
-  //   res.json(402, role);
-  // }, function onError(err) {
-  //   res.json(401, err);
-  // });
+  }, function noRoles(role) {
+    res.json(402, role);
+  }, function onError(err) {
+    res.json(401, err);
+  });
 });
 
 /**
@@ -901,7 +916,7 @@ router.post('/agency_Pay', function (req, res, next) {
     res.json("帐号不能为空");
     return;
   }
-  // adminService.auth(token,null, function onSuccess(admin) {
+  adminService.auth(token,null, function onSuccess(admin) {
     db.get_SelectAgency("userName",username,function(agency){
       if(agency){
         var entity = agency;
@@ -941,36 +956,6 @@ router.post('/agency_Pay', function (req, res, next) {
         return;
       }
     });    
-  // }, function noRoles(role) {
-  //   res.json(402, role);
-  // }, function onError(err) {
-  //   res.json(401, err);
-  // });
-});
-
-/**
-* @api {get} /api/admin/users/brokerageHistory 查看代理的流水
-* @apiDescription 查看代理的流水
-* @apiName brokerageHistory
-* @apiGroup AdminUsers
-* @apiHeader {string} Authorization token
-* @apiSuccess {string} data 是否成功
-* @apiError {string} error 错误信息
-* @apiErrorExample {string} Error Code:
-*     410 token格式错误
-* @apiVersion 1.0.0
-*/
-router.get('/brokerageHistory', function (req, res, next) {
-  var token = req.headers.authorization;
-  adminService.auth(token,null, function onSuccess(admin) {
-    db.get_brokerageHistory(function(history){
-      if(history){
-        res.json(history);
-      }
-      else{
-        res.json("空数据");
-      }
-    });    
   }, function noRoles(role) {
     res.json(402, role);
   }, function onError(err) {
@@ -979,32 +964,36 @@ router.get('/brokerageHistory', function (req, res, next) {
 });
 
 /**
-* @api {post} /api/admin/users/brokerageHistoryByID 查看指定代理的流水
-* @apiDescription 查看指定代理的流水
-* @apiName brokerageHistoryByID
+* @api {post} /api/admin/users/brokerageHistory 查看代理的流水
+* @apiDescription 查看代理的流水
+* @apiName brokerageHistory
 * @apiGroup AdminUsers
 * @apiHeader {string} Authorization token
-* @apiParam {string} username 用户名
+* @apiParam {string} username 用户名(可空)
+* @apiParam {int} skip 分页跳过记录数(可空)
+* @apiParam {int} limit 查询记录数(可空)
 * @apiSuccess {string} data 是否成功
 * @apiError {string} error 错误信息
 * @apiErrorExample {string} Error Code:
 *     410 token格式错误
 * @apiVersion 1.0.0
 */
-router.post('/brokerageHistoryByID', function (req, res, next) {
+router.post('/brokerageHistory', function (req, res, next) {
   var token = req.headers.authorization;
+  var skip = req.body.skip;
+  var limit = req.body.limit;
   var username = req.body.username;
-  if(!username){
-    res.json("帐号不能为空");
-    return;
+  if(skip < 0){
+    skip = 0;
   }
+
   adminService.auth(token,null, function onSuccess(admin) {
-    db.get_brokerageHistoryByID(username,function(history){
+    db.get_brokerageHistory(skip,limit,username,function(history){
       if(history){
         res.json(history);
       }
       else{
-        res.json('');
+        res.json("空数据");
       }
     });    
   }, function noRoles(role) {

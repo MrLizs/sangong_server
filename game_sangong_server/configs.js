@@ -1,15 +1,26 @@
-﻿var HALL_IP = "47.104.88.251";
+﻿// var HALL_IP = "103.60.166.3";
+// var HALL_IP = "192.168.1.107";
+var HALL_IP = "127.0.0.1";
 var HALL_ROOM_PORT = 9022;
 
 var ROOM_PRI_KEY = "shidianban!%*";
 
 var LOCAL_IP = '127.0.0.1';
 
+// exports.mysql = function(){
+// 	return {
+// 		HOST:'103.60.166.3',
+// 		USER:'root',
+// 		PSWD:'CC166.123456',
+// 		DB:'sangong',
+// 		PORT:3306,
+// 	}
+// };
 exports.mysql = function(){
 	return {
-		HOST:'47.104.88.251',
+		HOST:'127.0.0.1',
 		USER:'root',
-		PSWD:'miduo181818',
+		PSWD:'1234',
 		DB:'sangong',
 		PORT:3306,
 	}

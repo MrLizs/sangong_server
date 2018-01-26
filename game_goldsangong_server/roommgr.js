@@ -31,6 +31,7 @@ function create(ip, port, gameConfig) {
 		seats: [],
 		userMap: {},
 		users: [],
+		gameHistory: [],
 	};
 	roomInfo.conf = {
 		type: 'goldsangong',
@@ -191,4 +192,12 @@ exports.exitRoom = function (userId) {
 			seat.seatUserId = 0;
 		}
 	}
+};
+
+exports.getRoomHistory = function(roomid){
+        var roomInfo = rooms[roomid];
+        if (roomInfo == null) {
+            return;
+        }        
+        return roomInfo.gameHistory;
 };

@@ -331,6 +331,22 @@ exports.start = function(config,mgr){
 			}
 			socket.gameMgr.tip(socket.userId);
 		});
+
+		socket.on('get_room_history',function(data){
+			if(socket.userId == null){
+				return;
+			}
+			if(typeof(data)=='string'){
+				data = JSON.parse(data);
+			}
+			// console.log("roomid" + data.roomid);
+			if(!data.roomid){
+				return;
+			}
+			console.log('get_room_history')
+			var history = roomMgr.getRoomHistory(data.roomid);
+			userMgr.sendMsg(socket.userId,'getRoomHistory_push',{'historyData':history});
+		});
 	});
 
 	console.log("game server is listening on " + config.CLIENT_PORT);	

@@ -20,23 +20,23 @@ var agencyService = require('../../../service/agencyService');
 router.post('/login', function (req, res, next) {
     var userName = req.body.userName;
     var password = req.body.password;
-    db.get_agency_accountlock(userName,function(err,row){
-      if(row){
+    // db.get_agency_accountlock(userName,function(err,row){
+    //   if(row){
         agencyService.login(userName, password, function onSuccess(token) {
           res.json(token);
         }, function onError(err) {
           res.json(410,err);
         });
-      }
-      else if(row == false){
-        res.json('account is locked');
-        return;
-      }
-      else{
-        res.json(err);
-        return;
-      }
-    });
+    //   }
+    //   else if(row == false){
+    //     res.json('account is locked');
+    //     return;
+    //   }
+    //   else{
+    //     res.json(err);
+    //     return;
+    //   }
+    // });
 });
 
 /**
@@ -72,7 +72,7 @@ router.get('/logout', function (req, res, next) {
 router.get('/get_myAgencyInfo', function (req, res, next) {
   var token = req.headers.authorization;
   agencyService.auth(token,null, function onSuccess(admin){
-    console.log('aaaaaa');
+    console.log('获取自己代理信息:'+admin.userName);
       db.get_agency_Info_ByID(admin.userName,function(err,row){
         if(err){
           res.json('error');
@@ -201,20 +201,33 @@ router.post('/add_agencyOrders', function (req, res, next) {
   var money = parseInt(req.body.money);
   agencyService.auth(token,null, function onSuccess(admin){
     console.log('创建代理提现订单');
-    db.get_agency_Info_ByID(admin.userName,function(err,row){
+    db.get_agency_accountlock(userName,function(err,row){
       if(row){
-        if(money != 0 && row.accountbalance >= money){
-          db.add_agency_Orders(admin.userName,money,function(err,row){
-            if(err){
-              res.json('error');
-            }
-            else{
-              res.json(row);
-            }
-          });
+      db.get_agency_Info_ByID(admin.userName,function(err,row){
+        if(row){
+          if(money != 0 && row.accountbalance >= money){
+            db.add_agency_Orders(admin.userName,money,function(err,row){
+              if(err){
+                res.json('error');
+              }
+              else{
+                res.json(row);
+              }
+            });
+          }
         }
-      }
-    });
+      });
+    }
+    else if(row == false){
+      res.json('account is locked');
+      return;
+    }
+    else{
+      res.json(err);
+      return;
+    }
+  });
+    
       
   },function onNoRole(role){
     res.json(402, role);
@@ -293,7 +306,7 @@ router.get('/get_agency_team', function (req, res, next) {
   var token = req.headers.authorization;
   agencyService.auth(token,null, function onSuccess(admin){
     console.log('查看我的团队');
-    db.get_commissionhistory(function(err,rows){
+    db.get_commissionhistory(admin.userName,function(err,rows){
       if(rows){
         res.json(rows);
       }
@@ -320,6 +333,10 @@ router.get('/get_agency_player', function (req, res, next) {
   agencyService.auth(token,null, function onSuccess(admin){
     console.log('查看我的玩家');
     db.get_agency_player(admin.userName,function(err,rows){
+      if(err){
+        res.json(err);
+        return;
+      }
       if(rows){
         res.json(rows);
       }

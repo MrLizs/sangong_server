@@ -42,6 +42,26 @@ goldSanGongManager.prototype = {
 
     stateTimes:[5,15,5,16,10],
 
+
+    /**
+     * 金币场游戏历史管理
+     */
+    gameHistoryManager:function(roomid,resultObj){
+        var roomInfo = roomMgr.getRoom(roomid);
+        if (roomInfo == null) {
+            return;
+        }
+        if(roomInfo.gameHistory){
+            if(roomInfo.gameHistory.length >= 3){
+                var oo = roomInfo.gameHistory.shift();
+            }
+        }
+        else{
+            roomInfo.gameHistory = [];
+        }
+        roomInfo.gameHistory.push(resultObj);
+    },
+
     getNextState:function(state){
         var index = this.states.indexOf(state);
         if(index>=0){
@@ -599,6 +619,20 @@ goldSanGongManager.prototype = {
                 }
             }
         }
+
+        // console.error(seatsData);
+        var historyData = [];
+        for(let i = 0 ; i < seatsData.length ; i++){
+            var _history = {
+                holds:seatsData[i].holds,
+                paisResult:seatsData[i].paisResult,
+                seatIndex:seatsData[i].seatIndex,
+                haveStake:seatsData[i].haveStake,
+                totalStake:seatsData[i].totalStake,
+            };
+            historyData.push(_history);
+        }
+        this.gameHistoryManager(game.roomInfo.id,historyData);
 
         var userScoreMap={};
         var rate = game.roomInfo.conf.rate?game.roomInfo.conf.rate:0;//系统抽成
