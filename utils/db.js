@@ -2597,5 +2597,51 @@ exports.get_user_userlock = function(account,callback){
         }
     });
 };
+
+exports.get_robot_usablelist = function(roomid,callback){
+    callback = callback == null? nop:callback;
+    if(!roomid){
+        console.log("get_robot_usablelist roomid is null");
+        return;
+    }
+    var sql = 'SELECT account,roomid FROM t_users WHERE robot=1';
+    query(sql, function(err, rows, fields) {
+        if (err) {
+            callback(err);
+            return;
+        }
+        if(rows.length == 0){
+            callback('null',null);
+            return;
+        }
+        callback(null,rows);
+    });
+};
+
+exports.update_robot_usablelist = function(account,roomid,callback){
+    callback = callback == null? nop:callback;
+    if(!roomid || !account){
+        console.log("update_robot_usablelist roomid or account is null");
+        return;
+    }
+
+    var sql = 'UPDATE t_users SET roomid=? WHERE account=?';
+    sql = mysql.format(sql,[roomid,account]);
+    query(sql,function(err,rows,fields){
+        if(err){
+            console.log(err);
+            callback(false);
+            return;
+        }
+        else{
+            if(rows.affectedRows > 0){
+                callback(true);
+            }
+            else{
+                callback(false);
+            }
+        } 
+    });
+};
 //---------------------------
 exports.query = query;

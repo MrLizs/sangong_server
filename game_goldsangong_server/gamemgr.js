@@ -2,6 +2,7 @@ var roomMgr = require("./roommgr");
 var userMgr = require("./usermgr");
 var db = require("../utils/db");
 var crypto = require("../utils/crypto");
+var robotMgr = require("../robotService/robotManager");
 
 module.exports = goldSanGongManager;
 function goldSanGongManager() {
@@ -523,6 +524,7 @@ goldSanGongManager.prototype = {
         self.games[roomId] = game;
         var pushData = self.getStatePushData(game);
         userMgr.broacast(game.roomInfo.id,'state_idle_notify_push',pushData);
+        robotMgr.addedRobot(roomInfo,roomId);
     },
     
     gameStake: function (game) {

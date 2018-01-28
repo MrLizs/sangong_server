@@ -2,6 +2,7 @@ var roomMgr = require("./roommgr");
 var userMgr = require("./usermgr");
 var db = require("../utils/db");
 var crypto = require("../utils/crypto");
+var robotMgr = require("../robotService/robotManager");
 
 module.exports = sanGongManager;
 function sanGongManager() {
@@ -509,6 +510,7 @@ sanGongManager.prototype = {
             db.cost_gems(game.roomInfo.conf.creator, cost);
             console.log('cost_gems user[' + game.roomInfo.conf.creator + '] cost:' + cost);
         }
+        robotMgr.addedRobot(roomInfo,roomId);
     },
     
     gameStake: function (game) {
